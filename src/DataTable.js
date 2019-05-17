@@ -113,68 +113,74 @@ export default class DataTable extends React.Component {
                 this.editor.inline(e.target, {onBlur: 'submit'});
             }
         );
+        // $(this.editor).on('open', (e, mode, action) => {
+        //     // if (mode === 'inline') {
+        //         console.log('DataTableEditor - inline editor on open event');
+        //         $(this.editor).on('postEdit', () => {
+
+        //             console.log('DataTableEditor - inline editor postEdit event')
+        //             let rowIndexes = this.dataTable.rows( { order: 'applied' } ).indexes()
+        //             // let colIndexes = this.dataTable.columns( { order: 'applied' } ).indexes()
+        //             let thisCell = this.dataTable.cell( { focused: true } )
+        //             // console.log('DataTableEditor - thisCell', thisCell.node())
+        //             // console.log('DataTableEditor - rowIndexes', rowIndexes)
+        //             // console.log('DataTableEditor - columnIndexes', columnIndexes)
+        //             console.log('DataTableEditor - postEdit - thisCell.any()', thisCell.any())
+        //             if (thisCell.any()) {
+        //                 let thisRowIdx = thisCell.index().row
+        //                 let thisColIdx = thisCell.index().column
+        //                 let indexInRowIndexes = rowIndexes.indexOf(thisRowIdx)
+        //                 let indexInColIndexes = editableCols.indexOf(thisColIdx)
+        //                 console.log('DataTableEditor - postEdit - thisRowIdx', thisRowIdx)
+        //                 console.log('DataTableEditor - postEdit - thisColIdx', thisColIdx)
+        //                 // console.log('DataTableEditor - indexInRowIndexes', indexInRowIndexes)
+        //                 let nextRowIdx
+        //                 let nextColIdx
+        //                 if (rowIndexes[indexInRowIndexes + 1] !== undefined) {
+        //                     nextRowIdx = rowIndexes[indexInRowIndexes + 1];
+        //                     nextColIdx = thisColIdx;
+        //                 } else {
+        //                     nextRowIdx = rowIndexes[0];
+        //                     if (
+        //                         editableCols[
+        //                             indexInColIndexes + 1
+        //                         ] !== undefined
+        //                     ) {
+        //                         nextColIdx = editableCols[
+        //                             indexInColIndexes + 1
+        //                         ];
+        //                     } else {
+        //                         nextColIdx = editableCols[0];
+        //                     }
+        //                 }
+
+        //                 console.log('DataTableEditor - nextRowIdx', nextRowIdx)
+        //                 console.log('DataTableEditor - nextColIdx', nextColIdx)
+        //                 let nextCell = this.dataTable.cell({row: nextRowIdx, column: nextColIdx})
+        //                 // console.log('DataTableEditor - nextCell', nextCell.node())
+        //                 if (nextCell.length) {
+        //                     let nextCellNode = $(nextCell.node())
+        //                     // console.log('DataTableEditor - nextCellNode', nextCellNode)
+
+        //                     // the two lines affect the behaviour in question, alternate them to see
+        //                     // this.dataTable.cell($(this.dataTable.cell({row: rowIndexes[indexInRowIndexes], column: nextColIdx}).node())).focus();
+        //                     this.dataTable.cell(nextCellNode).focus();
+
+        //                     if(true)
+        //                     this.editor.inline(nextCellNode, {onBlur: 'submit'});
+
+        //                 }
+
+        //             }
+        //         });
+        //     // }
+        // });
         $(this.editor).on('open', (e, mode, action) => {
-            // if (mode === 'inline') {
-                console.log('DataTableEditor - inline editor on open event');
-                $(this.editor).on('postEdit', () => {
-
-                    console.log('DataTableEditor - inline editor postEdit event')
-                    let rowIndexes = this.dataTable.rows( { order: 'applied' } ).indexes()
-                    // let colIndexes = this.dataTable.columns( { order: 'applied' } ).indexes()
-                    let thisCell = this.dataTable.cell( { focused: true } )
-                    // console.log('DataTableEditor - thisCell', thisCell.node())
-                    // console.log('DataTableEditor - rowIndexes', rowIndexes)
-                    // console.log('DataTableEditor - columnIndexes', columnIndexes)
-                    console.log('DataTableEditor - postEdit - thisCell.any()', thisCell.any())
-                    if (thisCell.any()) {
-                        let thisRowIdx = thisCell.index().row
-                        let thisColIdx = thisCell.index().column
-                        let indexInRowIndexes = rowIndexes.indexOf(thisRowIdx)
-                        let indexInColIndexes = editableCols.indexOf(thisColIdx)
-                        console.log('DataTableEditor - postEdit - thisRowIdx', thisRowIdx)
-                        console.log('DataTableEditor - postEdit - thisColIdx', thisColIdx)
-                        // console.log('DataTableEditor - indexInRowIndexes', indexInRowIndexes)
-                        let nextRowIdx
-                        let nextColIdx
-                        if (rowIndexes[indexInRowIndexes + 1] !== undefined) {
-                            nextRowIdx = rowIndexes[indexInRowIndexes + 1];
-                            nextColIdx = thisColIdx;
-                        } else {
-                            nextRowIdx = rowIndexes[0];
-                            if (
-                                editableCols[
-                                    indexInColIndexes + 1
-                                ] !== undefined
-                            ) {
-                                nextColIdx = editableCols[
-                                    indexInColIndexes + 1
-                                ];
-                            } else {
-                                nextColIdx = editableCols[0];
-                            }
-                        }
-
-                        console.log('DataTableEditor - nextRowIdx', nextRowIdx)
-                        console.log('DataTableEditor - nextColIdx', nextColIdx)
-                        let nextCell = this.dataTable.cell({row: nextRowIdx, column: nextColIdx})
-                        // console.log('DataTableEditor - nextCell', nextCell.node())
-                        if (nextCell.length) {
-                            let nextCellNode = $(nextCell.node())
-                            // console.log('DataTableEditor - nextCellNode', nextCellNode)
-
-                            // the two lines affect the behaviour in question, alternate them to see
-                            // this.dataTable.cell($(this.dataTable.cell({row: rowIndexes[indexInRowIndexes], column: nextColIdx}).node())).focus();
-                            this.dataTable.cell(nextCellNode).focus();
-
-                            if(true)
-                            this.editor.inline(nextCellNode, {onBlur: 'submit'});
-
-                        }
-
-                    }
-                });
-            // }
-        });
+            console.log('DataTableEditor - inline editor on open event');
+            $(this.editor).on('postEdit', () => {
+                this.dataTable.keys.move('down')
+            })
+        })
         $(this.editor).on('close', () => {
             console.log('Listener Close event ') 
             $(this.editor).off('postEdit')
