@@ -7,9 +7,11 @@ import 'datatables.net-editor-dt/css/editor.dataTables.min.css'
 import 'datatables.net-select-dt/css/select.dataTables.min.css'
 import 'datatables.net-buttons-dt/css/buttons.dataTables.min.css'
 import 'datatables.net-keytable-dt/css/keyTable.dataTables.min.css'
+import './datatables.net-searchpane.css'
 require('datatables.net');
 require('datatables.net-fixedcolumns');
 require('datatables.net-scrollresize'); // local dependency made my me
+require('datatables.net-searchpane');  // local dependency made my me
 require('datatables.net-buttons');
 require('datatables.net-buttons/js/buttons.print.min.js');
 require('datatables.net-keytable');
@@ -22,6 +24,8 @@ require('datatables.net-editor')
 // console.log('$.fn.dataTable.Editor',$.fn.dataTable.Editor);
 
 // var editor;
+
+var isMobile = true
 
 export default class DataTable extends React.Component {
     constructor(props) {
@@ -71,7 +75,7 @@ export default class DataTable extends React.Component {
             // buttons: ['copy', 'csv', 'excel'],
             // buttons: true,
             scrollResize: true,
-            dom: 'rt', // https://datatables.net/reference/option/dom
+            dom: 'frt', // https://datatables.net/reference/option/dom
             paging: false,
             scrollX: true,
             scrollY: 100,
@@ -81,7 +85,8 @@ export default class DataTable extends React.Component {
             // rowId: 'id',
             keys: {
                 columns: editableCols,
-                editor: this.editor
+                editor: this.editor,
+                // editOnFocus: true,
                 // editorKey: 'tab-only' // should disable cell movement when edit by return
             },
             // select: true
@@ -90,6 +95,9 @@ export default class DataTable extends React.Component {
                 selector: 'td:first-child'
                 // blurable: true
             },
+            // searchPane: {
+            //     threshold: 0.5
+            // },
             // info: false
             // search: false,
             // fixedHeader: true,
@@ -97,90 +105,100 @@ export default class DataTable extends React.Component {
         });
         // console.log('DataTableEditor - editor',this.editor);
         // console.log('DataTableEditor - this.dataTable',this.dataTable);
-
+        // this.dataTable
+        //     // .on( 'preDraw', function () {
+        //     //     startTime = new Date().getTime();
+        //     // } )
+        //     .on( 'draw', () => {
+        //         this.dataTable.searchPanes.rebuild()
+        //     } );
         this.$el.on('key-focus', (e, datatable, cell) => {
             console.log('DataTableEditor - key-focus event');
             this.dataTable.row(cell.index().row).select();
         });
 
         // issue is between keys option and this
+        var clickType = isMobile ? 'click' : 'dblclick'
         this.$el.on(
-            'click',
+            // 'click',
             // 'dblclick',
+            clickType,
             // 'tbody td:not(:first-child)',
             'tbody td.editable',
             (e) => {
+                this.editor.off('postEdit')
                 this.editor.inline(e.target, {onBlur: 'submit'});
             }
         );
-        // $(this.editor).on('open', (e, mode, action) => {
-        //     // if (mode === 'inline') {
-        //         console.log('DataTableEditor - inline editor on open event');
-        //         $(this.editor).on('postEdit', () => {
-
-        //             console.log('DataTableEditor - inline editor postEdit event')
-        //             let rowIndexes = this.dataTable.rows( { order: 'applied' } ).indexes()
-        //             // let colIndexes = this.dataTable.columns( { order: 'applied' } ).indexes()
-        //             let thisCell = this.dataTable.cell( { focused: true } )
-        //             // console.log('DataTableEditor - thisCell', thisCell.node())
-        //             // console.log('DataTableEditor - rowIndexes', rowIndexes)
-        //             // console.log('DataTableEditor - columnIndexes', columnIndexes)
-        //             console.log('DataTableEditor - postEdit - thisCell.any()', thisCell.any())
-        //             if (thisCell.any()) {
-        //                 let thisRowIdx = thisCell.index().row
-        //                 let thisColIdx = thisCell.index().column
-        //                 let indexInRowIndexes = rowIndexes.indexOf(thisRowIdx)
-        //                 let indexInColIndexes = editableCols.indexOf(thisColIdx)
-        //                 console.log('DataTableEditor - postEdit - thisRowIdx', thisRowIdx)
-        //                 console.log('DataTableEditor - postEdit - thisColIdx', thisColIdx)
-        //                 // console.log('DataTableEditor - indexInRowIndexes', indexInRowIndexes)
-        //                 let nextRowIdx
-        //                 let nextColIdx
-        //                 if (rowIndexes[indexInRowIndexes + 1] !== undefined) {
-        //                     nextRowIdx = rowIndexes[indexInRowIndexes + 1];
-        //                     nextColIdx = thisColIdx;
-        //                 } else {
-        //                     nextRowIdx = rowIndexes[0];
-        //                     if (
-        //                         editableCols[
-        //                             indexInColIndexes + 1
-        //                         ] !== undefined
-        //                     ) {
-        //                         nextColIdx = editableCols[
-        //                             indexInColIndexes + 1
-        //                         ];
-        //                     } else {
-        //                         nextColIdx = editableCols[0];
-        //                     }
-        //                 }
-
-        //                 console.log('DataTableEditor - nextRowIdx', nextRowIdx)
-        //                 console.log('DataTableEditor - nextColIdx', nextColIdx)
-        //                 let nextCell = this.dataTable.cell({row: nextRowIdx, column: nextColIdx})
-        //                 // console.log('DataTableEditor - nextCell', nextCell.node())
-        //                 if (nextCell.length) {
-        //                     let nextCellNode = $(nextCell.node())
-        //                     // console.log('DataTableEditor - nextCellNode', nextCellNode)
-
-        //                     // the two lines affect the behaviour in question, alternate them to see
-        //                     // this.dataTable.cell($(this.dataTable.cell({row: rowIndexes[indexInRowIndexes], column: nextColIdx}).node())).focus();
-        //                     this.dataTable.cell(nextCellNode).focus();
-
-        //                     if(true)
-        //                     this.editor.inline(nextCellNode, {onBlur: 'submit'});
-
-        //                 }
-
-        //             }
-        //         });
-        //     // }
-        // });
         $(this.editor).on('open', (e, mode, action) => {
-            console.log('DataTableEditor - inline editor on open event');
-            $(this.editor).on('postEdit', () => {
-                this.dataTable.keys.move('down')
-            })
-        })
+            // if (mode === 'inline') {
+                console.log('DataTableEditor - inline editor on open event');
+                $(this.editor).on('postEdit', () => {
+
+                    console.log('DataTableEditor - inline editor postEdit event')
+                    let rowIndexes = this.dataTable.rows( { order: 'applied' } ).indexes()
+                    // let colIndexes = this.dataTable.columns( { order: 'applied' } ).indexes()
+                    let thisCell = this.dataTable.cell( { focused: true } )
+                    // console.log('DataTableEditor - thisCell', thisCell.node())
+                    // console.log('DataTableEditor - rowIndexes', rowIndexes)
+                    // console.log('DataTableEditor - columnIndexes', columnIndexes)
+                    console.log('DataTableEditor - postEdit - thisCell.any()', thisCell.any())
+                    if (thisCell.any()) {
+                        let thisRowIdx = thisCell.index().row
+                        let thisColIdx = thisCell.index().column
+                        let indexInRowIndexes = rowIndexes.indexOf(thisRowIdx)
+                        let indexInColIndexes = editableCols.indexOf(thisColIdx)
+                        console.log('DataTableEditor - postEdit - thisRowIdx', thisRowIdx)
+                        console.log('DataTableEditor - postEdit - thisColIdx', thisColIdx)
+                        // console.log('DataTableEditor - indexInRowIndexes', indexInRowIndexes)
+                        let nextRowIdx
+                        let nextColIdx
+                        if (rowIndexes[indexInRowIndexes + 1] !== undefined) {
+                            nextRowIdx = rowIndexes[indexInRowIndexes + 1];
+                            nextColIdx = thisColIdx;
+                        } else {
+                            nextRowIdx = rowIndexes[0];
+                            if (
+                                editableCols[
+                                    indexInColIndexes + 1
+                                ] !== undefined
+                            ) {
+                                nextColIdx = editableCols[
+                                    indexInColIndexes + 1
+                                ];
+                            } else {
+                                nextColIdx = editableCols[0];
+                            }
+                        }
+
+                        console.log('DataTableEditor - nextRowIdx', nextRowIdx)
+                        console.log('DataTableEditor - nextColIdx', nextColIdx)
+                        let nextCell = this.dataTable.cell({row: nextRowIdx, column: nextColIdx})
+                        // console.log('DataTableEditor - nextCell', nextCell.node())
+                        if (nextCell.length) {
+                            let nextCellNode = $(nextCell.node())
+                            // console.log('DataTableEditor - nextCellNode', nextCellNode)
+
+                            // the two lines affect the behaviour in question, alternate them to see
+                            // this.dataTable.cell($(this.dataTable.cell({row: rowIndexes[indexInRowIndexes], column: nextColIdx}).node())).focus();
+                            this.dataTable.cell(nextCellNode).focus();
+
+                            if(isMobile)
+                            this.editor.inline(nextCellNode, {onBlur: 'submit'});
+
+                        }
+
+                    }
+                });
+            // }
+        });
+        // $(this.editor).on('open', (e, mode, action) => {
+        //     console.log('DataTableEditor - inline editor on open event');
+        //     $(this.editor).on('postEdit', () => {
+        //         console.log('DataTableEditor - postEdit event');
+        //         this.dataTable.keys.move('down')
+        //     })
+        // })
         $(this.editor).on('close', () => {
             console.log('Listener Close event ') 
             $(this.editor).off('postEdit')
